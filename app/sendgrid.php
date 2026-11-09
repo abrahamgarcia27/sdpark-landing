@@ -16,6 +16,7 @@ function reservation_email_html(array $payload, string $audience): string
 {
     $payload = ensure_confirmation_number($payload);
     $context = reservation_email_context($payload);
+    $context['customer_confirmation'] = $audience === 'customer';
     $adminIntro = '';
 
     if ($audience === 'admin') {
@@ -33,6 +34,9 @@ function reservation_email_text(array $payload, string $audience): string
 {
     $title = reservation_email_subject($payload, $audience);
     $lines = [$title, ''];
+    if ($audience === 'customer') {
+        array_unshift($lines, 'RESERVATION CONFIRMATION', '');
+    }
 
     foreach (reservation_display_rows($payload) as $label => $value) {
         $lines[] = $label . ': ' . $value;
@@ -119,6 +123,7 @@ function reservation_email_template(array $context, string $adminIntro): string
         . '<table width="640" cellpadding="0" cellspacing="0" border="0" class="wrapper" bgcolor="#FFFFFF"><tr><td align="center" valign="top">'
         . $adminIntro
         . '<table width="600" cellpadding="0" cellspacing="0" border="0" class="container"><tr><td width="600" class="mobile" align="left" valign="top">'
+        . (!empty($context['customer_confirmation']) ? '<p style="margin:16px 0 0;"><b>RESERVATION CONFIRMATION</b></p>' : '')
         . '<h1 style="color:#ce363f;"><b>' . e($context['headline']) . '</b></h1>'
         . 'Thank you for using our online reservation system. We look forward to serving you! <br />'
         . '<b>With 15+ years in airport parking, we provide reliable and secure solutions.</b> <br /><hr>'
