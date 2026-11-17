@@ -48,7 +48,7 @@ function reservation_email_subject(array $payload, string $audience): string
 
     if ($audience === 'admin') {
         $prefix = $context['is_cruise'] ? '[CRUISE PARKING] - ' : '';
-        return $context['customer_name'] . ': ' . $prefix . 'New Reservation Request: '
+        return $context['customer_name'] . ': ' . $prefix . 'RESERVATION CONFIRMATION: '
             . $context['dropoff_date'] . ' to ' . $context['pickup_date'];
     }
 
