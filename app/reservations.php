@@ -66,6 +66,12 @@ function validate_reservation(array $reservation): array
     $end = reservation_datetime($reservation['pickup_date'], $reservation['pickup_time']);
     $now = new DateTimeImmutable('now', app_timezone());
     $today = $now->setTime(0, 0);
+    $restrictedDates = restricted_reservation_dates();
+    foreach (['dropoff_date', 'pickup_date'] as $field) {
+        if (in_array($reservation[$field], $restrictedDates, true)) {
+            $errors[$field] = 'This date is unavailable. Please choose another date.';
+        }
+    }
 
     if (!$start) {
         $errors['dropoff_date'] = 'Please choose a valid drop-off date and time.';

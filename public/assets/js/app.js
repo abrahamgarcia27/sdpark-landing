@@ -26,6 +26,8 @@
   const currentDateValue = form.dataset.currentDate;
   const currentTimeValue = form.dataset.currentTime;
   const minReservationDays = Math.max(1, Number(form.dataset.minReservationDays || 1));
+  const restrictedDates = new Set(JSON.parse(form.dataset.restrictedDates || '[]'));
+  let datePickers = [];
   const accessFeeCents = Math.max(0, Number(form.dataset.accessFeeCents || 0));
   const recaptchaSiteKey = form.dataset.recaptchaSiteKey || '';
   const currency = new Intl.NumberFormat('en-US', {
@@ -62,6 +64,14 @@
     const next = new Date(date.getTime());
     next.setDate(next.getDate() + days);
     return next;
+  }
+
+  function nextAvailableDate(value) {
+    let date = parseDateValue(value);
+    while (restrictedDates.has(dateValue(date))) {
+      date = addDays(date, 1);
+    }
+    return dateValue(date);
   }
 
   function timeMinutes(value) {
@@ -131,6 +141,10 @@
     clearStepError(stepIndex);
 
     if (stepIndex === 0) {
+      if (restrictedDates.has(startDate.value) || restrictedDates.has(endDate.value)) {
+        showStepError(stepIndex, 'This date is unavailable. Please choose another date.');
+        return false;
+      }
       if (!startDate.value || !startTime.value || !endDate.value || !endTime.value) {
         showStepError(stepIndex, 'Please choose your drop-off and pick-up dates and times.');
         return false;
@@ -281,6 +295,7 @@
       startDate.value = currentDateValue;
     }
 
+    startDate.value = nextAvailableDate(startDate.value || currentDateValue);
     const minPickup = startDate.value || currentDateValue;
     endDate.min = minPickup;
 
@@ -288,7 +303,15 @@
       endDate.value = minPickup;
     }
 
+    endDate.value = nextAvailableDate(endDate.value || minPickup);
     syncTimeOptions();
+    // Time availability can advance a date; skip any blocked dates it lands on.
+    startDate.value = nextAvailableDate(startDate.value);
+    endDate.value = nextAvailableDate(endDate.value < startDate.value ? startDate.value : endDate.value);
+    datePickers.forEach(function (picker, index) {
+      picker.set('minDate', index === 0 ? currentDateValue : startDate.value);
+      picker.setDate(index === 0 ? startDate.value : endDate.value, false);
+    });
   }
 
   function requestRecaptchaToken() {
@@ -410,6 +433,17 @@
   });
 
   syncDateRules();
+  if (typeof window.flatpickr === 'function') {
+    datePickers = [startDate, endDate].map(function (input) {
+      return window.flatpickr(input, {
+        dateFormat: 'Y-m-d',
+        minDate: input === startDate ? currentDateValue : startDate.value,
+        disable: Array.from(restrictedDates),
+        disableMobile: true,
+        allowInput: false
+      });
+    });
+  }
   syncLotPills();
   showStep(0);
   }

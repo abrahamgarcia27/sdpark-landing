@@ -41,6 +41,15 @@ function min_reservation_days(): int
     return max(1, (int) config('MIN_RESERVATION_DAYS', '1'));
 }
 
+function restricted_reservation_dates(): array
+{
+    $dates = array_map('trim', explode(',', config('RESTRICTED_DATES', '')));
+    return array_values(array_unique(array_filter($dates, static function (string $date): bool {
+        $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
+        return $parsed && $parsed->format('Y-m-d') === $date;
+    })));
+}
+
 function access_fee_cents(): int
 {
     return max(0, (int) config('ACCESS_FEE_CENTS', '475'));

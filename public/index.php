@@ -49,6 +49,7 @@ function render_reservation_form(
         data-current-date="<?= htmlspecialchars($now->format('Y-m-d')) ?>"
         data-current-time="<?= htmlspecialchars($now->format('H:i')) ?>"
         data-min-reservation-days="<?= min_reservation_days() ?>"
+        data-restricted-dates="<?= htmlspecialchars(json_encode(restricted_reservation_dates()), ENT_QUOTES, 'UTF-8') ?>"
         data-access-fee-cents="<?= access_fee_cents() ?>"
         data-recaptcha-site-key="<?= htmlspecialchars($recaptchaSiteKey) ?>"
         novalidate
@@ -221,6 +222,7 @@ function render_reservation_form(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Airport Parking in San Diego | SD Park Shuttle & Fly</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <meta name="description" content="Reserve affordable San Diego airport and cruise parking with free shuttle service from SD Park Shuttle & Fly.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -331,6 +333,7 @@ function render_reservation_form(
   <?php if ($recaptchaSiteKey !== ''): ?>
     <script src="https://www.google.com/recaptcha/api.js?render=<?= urlencode($recaptchaSiteKey) ?>" defer></script>
   <?php endif; ?>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
   <script src="<?= htmlspecialchars(app_url('/assets/js/app.js')) ?>" defer></script>
   <?php render_tracking_snippet('footer.txt'); ?>
 </body>
