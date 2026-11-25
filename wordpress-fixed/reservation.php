@@ -191,6 +191,81 @@
         font-size: 1em !important;
         width: 60px !important;
     }
+.sdpark-calendar {
+        font-family: Arial, sans-serif;
+        background: #fff;
+        border: 1px solid #dedede;
+        border-radius: 8px;
+        box-shadow: 0 12px 36px rgba(0,0,0,.18);
+        padding-bottom: 12px;
+        color: #232323;
+    }
+    .sdpark-calendar__heading {
+        padding: 14px 18px;
+        margin: 0;
+        border-bottom: 1px solid #dedede;
+        font-size: 15px !important;
+        line-height: 1.4 !important;
+        font-weight: 700;
+        text-align: left;
+    }
+    .sdpark-calendar .flatpickr-months {
+        padding: 8px 0;
+    }
+    .sdpark-calendar .flatpickr-month {
+        height: 34px !important;
+    }
+    .sdpark-calendar .flatpickr-prev-month,
+    .sdpark-calendar .flatpickr-next-month {
+        top: 58px;
+        height: 34px;
+    }
+    .sdpark-calendar .flatpickr-current-month {
+        font-size: 16px !important;
+    }
+    .sdpark-calendar .flatpickr-current-month input.cur-year {
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 0 0 0 4px !important;
+        border: 0 !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        font-size: 16px !important;
+        box-shadow: none !important;
+    }
+    .sdpark-calendar .flatpickr-weekday {
+        color: #5d6167;
+        font-size: 12px !important;
+        font-weight: 600;
+    }
+    .sdpark-calendar .flatpickr-day {
+        border-radius: 4px;
+        font-size: 14px !important;
+        font-weight: 600;
+        color: #232323;
+    }
+    .sdpark-calendar .flatpickr-day:hover,
+    .sdpark-calendar .flatpickr-day:focus {
+        background: #fff4d1;
+        border-color: #f4c542;
+    }
+    .sdpark-calendar .flatpickr-day.selected,
+    .sdpark-calendar .flatpickr-day.selected:hover {
+        color: #fff;
+        background: #BD0F12;
+        border-color: #BD0F12;
+    }
+    .sdpark-calendar .flatpickr-day.flatpickr-disabled,
+    .sdpark-calendar .flatpickr-day.flatpickr-disabled:hover {
+        color: #aaa;
+        background: #fff;
+        border-color: transparent;
+        cursor: not-allowed;
+    }
+    .sdpark-calendar .sdpark-calendar__blocked {
+        text-decoration: line-through;
+    }
+
 </style>
 
 <div class="container">
@@ -449,6 +524,60 @@ const minDays = <?php echo max(1, (int) get_field('number_of_days', 80)); ?>;
         dateFormat: "m/d/Y",
         minDate: "today",
         disable: dates_array,
+        altInput: true,
+        altFormat: 'M j, Y',
+        ariaDateFormat: 'F j, Y',
+        showMonths: window.innerWidth >= 760 ? 2 : 1,
+        monthSelectorType: 'static',
+        disableMobile: true,
+        allowInput: false,
+        onReady: function (dates, value, picker) {
+            picker.calendarContainer.classList.add('sdpark-calendar');
+            const heading = document.createElement('div');
+            heading.className = 'sdpark-calendar__heading';
+            heading.textContent = picker.input.id === 'drop_off' ? 'Drop-off date' : 'Pick-up date';
+            picker.calendarContainer.prepend(heading);
+            picker.altInput.setAttribute('aria-label', heading.textContent);
+            picker.altInput.setAttribute('aria-haspopup', 'dialog');
+            picker.calendarContainer.setAttribute('role', 'dialog');
+            picker.calendarContainer.setAttribute('aria-label', heading.textContent);
+        },
+        onOpen: function (dates, value, picker) {
+            picker.set('showMonths', window.innerWidth >= 760 ? 2 : 1);
+            if (picker.input.id === 'pick_up') {
+                const startPicker = document.getElementById('drop_off')._flatpickr;
+                const start = startPicker && startPicker.selectedDates[0];
+                if (start) {
+                    picker.set('minDate', start);
+                    picker.jumpToDate(start);
+                }
+            }
+            picker.altInput.setAttribute('aria-expanded', 'true');
+        },
+        onChange: function (dates, value, picker) {
+            if (picker.input.id === 'drop_off' && dates[0]) {
+                const endInput = document.getElementById('pick_up');
+                const endPicker = endInput._flatpickr;
+                if (endPicker) {
+                    endPicker.set('minDate', dates[0]);
+                    endPicker.jumpToDate(dates[0]);
+                    endInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        },
+        onClose: function (dates, value, picker) {
+            picker.altInput.setAttribute('aria-expanded', 'false');
+        },
+        onDayCreate: function (dates, value, picker, day) {
+            if (dates_array.some(function (blocked) {
+                return blocked.getFullYear() === day.dateObj.getFullYear()
+                    && blocked.getMonth() === day.dateObj.getMonth()
+                    && blocked.getDate() === day.dateObj.getDate();
+            })) {
+                day.classList.add('sdpark-calendar__blocked');
+                day.title = 'Unavailable';
+            }
+        },
     });
 
     const pickUp = document.getElementById("pick_up");

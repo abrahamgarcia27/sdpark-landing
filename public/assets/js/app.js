@@ -459,7 +459,16 @@
         },
         onOpen: function (dates, value, picker) {
           picker.set('showMonths', window.innerWidth >= 760 ? 2 : 1);
+          if (input === endDate && startDate.value) {
+            picker.jumpToDate(startDate.value);
+          }
           picker.altInput.setAttribute('aria-expanded', 'true');
+        },
+        onChange: function (dates, value, picker) {
+          if (input === startDate && value && datePickers[1]) {
+            datePickers[1].set('minDate', value);
+            datePickers[1].jumpToDate(value);
+          }
         },
         onClose: function (dates, value, picker) {
           picker.altInput.setAttribute('aria-expanded', 'false');
