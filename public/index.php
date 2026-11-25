@@ -222,13 +222,13 @@ function render_reservation_form(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Airport Parking in San Diego | SD Park Shuttle & Fly</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="<?= htmlspecialchars(app_url('/assets/vendor/flatpickr/flatpickr.min.css')) ?>">
   <meta name="description" content="Reserve affordable San Diego airport and cruise parking with free shuttle service from SD Park Shuttle & Fly.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="<?= htmlspecialchars(app_url('/favicon.svg')) ?>" type="image/svg+xml">
-  <link rel="stylesheet" href="<?= htmlspecialchars(app_url('/assets/css/styles.css')) ?>">
+  <link rel="stylesheet" href="<?= htmlspecialchars(app_url('/assets/css/styles.css')) ?>?v=<?= filemtime(__DIR__ . '/assets/css/styles.css') ?>">
   <?php render_tracking_snippet('header.txt'); ?>
 </head>
 <body>
@@ -333,8 +333,8 @@ function render_reservation_form(
   <?php if ($recaptchaSiteKey !== ''): ?>
     <script src="https://www.google.com/recaptcha/api.js?render=<?= urlencode($recaptchaSiteKey) ?>" defer></script>
   <?php endif; ?>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
-  <script src="<?= htmlspecialchars(app_url('/assets/js/app.js')) ?>" defer></script>
+  <script src="<?= htmlspecialchars(app_url('/assets/vendor/flatpickr/flatpickr.min.js')) ?>" defer></script>
+  <script src="<?= htmlspecialchars(app_url('/assets/js/app.js')) ?>?v=<?= filemtime(__DIR__ . '/assets/js/app.js') ?>" defer></script>
   <?php render_tracking_snippet('footer.txt'); ?>
 </body>
 </html>

@@ -437,10 +437,40 @@
     datePickers = [startDate, endDate].map(function (input) {
       return window.flatpickr(input, {
         dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'M j, Y',
+        ariaDateFormat: 'F j, Y',
+        showMonths: window.innerWidth >= 760 ? 2 : 1,
+        monthSelectorType: 'static',
         minDate: input === startDate ? currentDateValue : startDate.value,
         disable: Array.from(restrictedDates),
         disableMobile: true,
-        allowInput: false
+        allowInput: false,
+        onReady: function (dates, value, picker) {
+          picker.calendarContainer.classList.add('sdpark-calendar');
+          const heading = document.createElement('div');
+          heading.className = 'sdpark-calendar__heading';
+          heading.textContent = input === startDate ? 'Drop-off date' : 'Pick-up date';
+          picker.calendarContainer.prepend(heading);
+          picker.altInput.setAttribute('aria-label', heading.textContent);
+          picker.altInput.setAttribute('aria-haspopup', 'dialog');
+          picker.calendarContainer.setAttribute('role', 'dialog');
+          picker.calendarContainer.setAttribute('aria-label', heading.textContent);
+        },
+        onOpen: function (dates, value, picker) {
+          picker.set('showMonths', window.innerWidth >= 760 ? 2 : 1);
+          picker.altInput.setAttribute('aria-expanded', 'true');
+        },
+        onClose: function (dates, value, picker) {
+          picker.altInput.setAttribute('aria-expanded', 'false');
+        },
+        onDayCreate: function (dates, value, picker, day) {
+          if (restrictedDates.has(dateValue(day.dateObj))) {
+            day.classList.add('sdpark-calendar__blocked');
+            day.title = 'Unavailable';
+            day.setAttribute('aria-label', day.getAttribute('aria-label') + ', unavailable');
+          }
+        }
       });
     });
   }
